@@ -38,7 +38,8 @@ dependencies = [
     "pytz==2024.1",
     "certifi==2022.12.7",
     "keyring==25.2.1",
-    "keyrings-alt==5.0.1"
+    "keyrings-alt==5.0.1",
+    "srp==1.0.21",
 ]
 
 [project.optional-dependencies]
