@@ -17,7 +17,13 @@ from pyicloud_ipd.services.photos import PhotoAsset, PhotoLibrary, PhotosService
 from tzlocal import get_localzone
 from vcr import VCR
 
-from tests.helpers import path_from_project_root, print_result_exception, recreate_path
+from tests.helpers import (
+    mocked_icloud_data,
+    mocked_load_session_data,
+    path_from_project_root,
+    print_result_exception,
+    recreate_path,
+)
 
 vcr = VCR(decode_compressed_response=True, record_mode="none")
 
@@ -49,7 +55,13 @@ class AutodeletePhotosTestCase(TestCase):
 
             dt_mock.return_value = NewDateTime(2018, 1, 1, 0, 0, 0)
 
-            with vcr.use_cassette(os.path.join(self.vcr_path, "download_autodelete_photos.yml")):
+            with vcr.use_cassette(
+                os.path.join(self.vcr_path, "download_autodelete_photos.yml")
+            ), mock.patch.object(
+                PyiCloudService, "_load_session_data", new=mocked_load_session_data
+            ), mock.patch.object(
+                PyiCloudService, "_validate_token", return_value=mocked_icloud_data
+            ):
                 # Pass fixed client ID via environment variable
                 runner = CliRunner(env={"CLIENT_ID": "DE309E26-942E-11E8-92F5-14109FE0B321"})
                 result = runner.invoke(
@@ -153,7 +165,11 @@ class AutodeletePhotosTestCase(TestCase):
             f"{f'{datetime.datetime.fromtimestamp(1686106167436.0 / 1000.0, tz=pytz.utc).astimezone(get_localzone()):%Y/%m/%d}'}/IMG_3589.JPG"
         ]
 
-        with vcr.use_cassette(os.path.join(self.vcr_path, "download_autodelete_photos.yml")):
+        with vcr.use_cassette(
+            os.path.join(self.vcr_path, "download_autodelete_photos.yml")
+        ), mock.patch.object(
+            PyiCloudService, "_load_session_data", new=mocked_load_session_data
+        ), mock.patch.object(PyiCloudService, "_validate_token", return_value=mocked_icloud_data):
             # Pass fixed client ID via environment variable
             runner = CliRunner(env={"CLIENT_ID": "DE309E26-942E-11E8-92F5-14109FE0B321"})
             result = runner.invoke(
@@ -281,7 +297,11 @@ class AutodeletePhotosTestCase(TestCase):
         for file_name in files_to_create + files_to_delete:
             open(os.path.join(data_dir, file_name), "a").close()
 
-        with vcr.use_cassette(os.path.join(self.vcr_path, "autodelete_photos.yml")):
+        with vcr.use_cassette(
+            os.path.join(self.vcr_path, "autodelete_photos.yml")
+        ), mock.patch.object(
+            PyiCloudService, "_load_session_data", new=mocked_load_session_data
+        ), mock.patch.object(PyiCloudService, "_validate_token", return_value=mocked_icloud_data):
             # Pass fixed client ID via environment variable
             runner = CliRunner(env={"CLIENT_ID": "DE309E26-942E-11E8-92F5-14109FE0B321"})
             result = runner.invoke(
@@ -363,7 +383,11 @@ class AutodeletePhotosTestCase(TestCase):
             f"{f'{datetime.datetime.fromtimestamp(1686106167436.0 / 1000.0, tz=pytz.utc).astimezone(get_localzone()):%Y/%m/%d}'}/IMG_3589.JPG"
         ]
 
-        with vcr.use_cassette(os.path.join(self.vcr_path, "download_autodelete_photos.yml")):
+        with vcr.use_cassette(
+            os.path.join(self.vcr_path, "download_autodelete_photos.yml")
+        ), mock.patch.object(
+            PyiCloudService, "_load_session_data", new=mocked_load_session_data
+        ), mock.patch.object(PyiCloudService, "_validate_token", return_value=mocked_icloud_data):
 
             def mock_raise_response_error(
                 a1_: logging.Logger, a2_: PhotosService, a3_: PhotoLibrary, a4_: PhotoAsset
@@ -457,7 +481,11 @@ class AutodeletePhotosTestCase(TestCase):
             f"{f'{datetime.datetime.fromtimestamp(1686106167436.0 / 1000.0, tz=pytz.utc).astimezone(get_localzone()):%Y/%m/%d}'}/IMG_3589.JPG"
         ]
 
-        with vcr.use_cassette(os.path.join(self.vcr_path, "download_autodelete_photos.yml")):
+        with vcr.use_cassette(
+            os.path.join(self.vcr_path, "download_autodelete_photos.yml")
+        ), mock.patch.object(
+            PyiCloudService, "_load_session_data", new=mocked_load_session_data
+        ), mock.patch.object(PyiCloudService, "_validate_token", return_value=mocked_icloud_data):
 
             def mock_raise_response_error(
                 a1_: logging.Logger, a2_: PhotosService, a3_: PhotoLibrary, a4_: PhotoAsset
@@ -553,7 +581,11 @@ class AutodeletePhotosTestCase(TestCase):
             f"{f'{datetime.datetime.fromtimestamp(1686106167436.0 / 1000.0, tz=pytz.utc).astimezone(get_localzone()):%Y/%m/%d}'}/IMG_3589.JPG"
         ]
 
-        with vcr.use_cassette(os.path.join(self.vcr_path, "download_autodelete_photos.yml")):
+        with vcr.use_cassette(
+            os.path.join(self.vcr_path, "download_autodelete_photos.yml")
+        ), mock.patch.object(
+            PyiCloudService, "_load_session_data", new=mocked_load_session_data
+        ), mock.patch.object(PyiCloudService, "_validate_token", return_value=mocked_icloud_data):
 
             def mock_raise_response_error(
                 a1_: logging.Logger, a2_: PhotosService, a3_: PhotoLibrary, a4_: PhotoAsset
@@ -633,7 +665,11 @@ class AutodeletePhotosTestCase(TestCase):
             f"{f'{datetime.datetime.fromtimestamp(1686106167436.0 / 1000.0, tz=pytz.utc).astimezone(get_localzone()):%Y/%m/%d}'}/IMG_3589.JPG"
         ]
 
-        with vcr.use_cassette(os.path.join(self.vcr_path, "download_autodelete_photos.yml")):
+        with vcr.use_cassette(
+            os.path.join(self.vcr_path, "download_autodelete_photos.yml")
+        ), mock.patch.object(
+            PyiCloudService, "_load_session_data", new=mocked_load_session_data
+        ), mock.patch.object(PyiCloudService, "_validate_token", return_value=mocked_icloud_data):
 
             def mock_raise_response_error(
                 a1_: logging.Logger, a2_: PhotosService, a3_: PhotoLibrary, a4_: PhotoAsset
@@ -743,7 +779,11 @@ class AutodeletePhotosTestCase(TestCase):
         for file_name in files_to_create + files_to_delete:
             open(os.path.join(data_dir, file_name), "a").close()
 
-        with vcr.use_cassette(os.path.join(self.vcr_path, "autodelete_photos.yml")):
+        with vcr.use_cassette(
+            os.path.join(self.vcr_path, "autodelete_photos.yml")
+        ), mock.patch.object(
+            PyiCloudService, "_load_session_data", new=mocked_load_session_data
+        ), mock.patch.object(PyiCloudService, "_validate_token", return_value=mocked_icloud_data):
             # Pass fixed client ID via environment variable
             runner = CliRunner(env={"CLIENT_ID": "DE309E26-942E-11E8-92F5-14109FE0B321"})
             result = runner.invoke(
@@ -841,7 +881,11 @@ class AutodeletePhotosTestCase(TestCase):
         for file_name in files_to_create + files_to_delete:
             open(os.path.join(data_dir, file_name), "a").close()
 
-        with vcr.use_cassette(os.path.join(self.vcr_path, "autodelete_photos.yml")):
+        with vcr.use_cassette(
+            os.path.join(self.vcr_path, "autodelete_photos.yml")
+        ), mock.patch.object(
+            PyiCloudService, "_load_session_data", new=mocked_load_session_data
+        ), mock.patch.object(PyiCloudService, "_validate_token", return_value=mocked_icloud_data):
             # Pass fixed client ID via environment variable
             runner = CliRunner(env={"CLIENT_ID": "DE309E26-942E-11E8-92F5-14109FE0B321"})
             result = runner.invoke(
@@ -937,7 +981,11 @@ class AutodeletePhotosTestCase(TestCase):
             os.makedirs(os.path.join(data_dir, path_name), exist_ok=True)
             open(os.path.join(data_dir, file_name), "a").close()
 
-        with vcr.use_cassette(os.path.join(self.vcr_path, "autodelete_photos.yml")):
+        with vcr.use_cassette(
+            os.path.join(self.vcr_path, "autodelete_photos.yml")
+        ), mock.patch.object(
+            PyiCloudService, "_load_session_data", new=mocked_load_session_data
+        ), mock.patch.object(PyiCloudService, "_validate_token", return_value=mocked_icloud_data):
             # Pass fixed client ID via environment variable
             runner = CliRunner(env={"CLIENT_ID": "DE309E26-942E-11E8-92F5-14109FE0B321"})
             result = runner.invoke(
@@ -1031,7 +1079,11 @@ class AutodeletePhotosTestCase(TestCase):
             os.makedirs(os.path.join(data_dir, path_name), exist_ok=True)
             open(os.path.join(data_dir, file_name), "a").close()
 
-        with vcr.use_cassette(os.path.join(self.vcr_path, "autodelete_photos_heic.yml")):
+        with vcr.use_cassette(
+            os.path.join(self.vcr_path, "autodelete_photos_heic.yml")
+        ), mock.patch.object(
+            PyiCloudService, "_load_session_data", new=mocked_load_session_data
+        ), mock.patch.object(PyiCloudService, "_validate_token", return_value=mocked_icloud_data):
             # Pass fixed client ID via environment variable
             runner = CliRunner(env={"CLIENT_ID": "DE309E26-942E-11E8-92F5-14109FE0B321"})
             result = runner.invoke(

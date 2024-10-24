@@ -3,14 +3,21 @@ import inspect
 import os
 import shutil
 from typing import Sequence, Tuple
-from unittest import TestCase
+from unittest import TestCase, mock
 
 import pytest
 from click.testing import CliRunner
 from icloudpd.base import main
+from pyicloud_ipd.base import PyiCloudService
 from vcr import VCR
 
-from tests.helpers import path_from_project_root, print_result_exception, recreate_path
+from tests.helpers import (
+    mocked_icloud_data,
+    mocked_load_session_data,
+    path_from_project_root,
+    print_result_exception,
+    recreate_path,
+)
 
 vcr = VCR(decode_compressed_response=True, record_mode="none")
 
@@ -44,7 +51,14 @@ class CliTestCase(TestCase):
         for log_level, expected, not_expected in parameters:
             self._caplog.clear()
             recreate_path(cookie_dir)
-            with vcr.use_cassette(os.path.join(self.vcr_path, "listing_photos.yml")):
+
+            with vcr.use_cassette(
+                os.path.join(self.vcr_path, "listing_photos.yml")
+            ), mock.patch.object(
+                PyiCloudService, "_load_session_data", new=mocked_load_session_data
+            ), mock.patch.object(
+                PyiCloudService, "_validate_token", return_value=mocked_icloud_data
+            ):
                 # Pass fixed client ID via environment variable
                 runner = CliRunner(env={"CLIENT_ID": "DE309E26-942E-11E8-92F5-14109FE0B321"})
                 result = runner.invoke(
@@ -82,7 +96,9 @@ class CliTestCase(TestCase):
         for dir in [base_dir, cookie_dir, data_dir]:
             recreate_path(dir)
 
-        with vcr.use_cassette(os.path.join(self.vcr_path, "listing_photos.yml")):
+        with vcr.use_cassette(os.path.join(self.vcr_path, "listing_photos.yml")), mock.patch.object(
+            PyiCloudService, "_load_session_data", new=mocked_load_session_data
+        ), mock.patch.object(PyiCloudService, "_validate_token", return_value=mocked_icloud_data):
             # Force tqdm progress bar via ENV var
             runner = CliRunner(
                 env={"FORCE_TQDM": "yes", "CLIENT_ID": "DE309E26-942E-11E8-92F5-14109FE0B321"}
@@ -118,7 +134,9 @@ class CliTestCase(TestCase):
         for dir in [base_dir, cookie_dir, data_dir]:
             recreate_path(dir)
 
-        with vcr.use_cassette(os.path.join(self.vcr_path, "listing_photos.yml")):
+        with vcr.use_cassette(os.path.join(self.vcr_path, "listing_photos.yml")), mock.patch.object(
+            PyiCloudService, "_load_session_data", new=mocked_load_session_data
+        ), mock.patch.object(PyiCloudService, "_validate_token", return_value=mocked_icloud_data):
             # Pass fixed client ID via environment variable
             runner = CliRunner(env={"CLIENT_ID": "DE309E26-942E-11E8-92F5-14109FE0B321"})
             result = runner.invoke(

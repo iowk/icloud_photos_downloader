@@ -116,17 +116,7 @@ class PyiCloudService:
 
         LOGGER.debug("Using session file %s", self.session_path)
 
-        self.session_data = {}
-        try:
-            with open(self.session_path, encoding="utf-8") as session_f:
-                self.session_data = json.load(session_f)
-        except:  
-            LOGGER.info("Session file does not exist")
-        session_client_id: Optional[str] = self.session_data.get("client_id")
-        if session_client_id:
-            self.client_id = session_client_id
-        else:
-            self.session_data.update({"client_id": self.client_id})
+        self._load_session_data()
 
         self.session:PyiCloudSession = PyiCloudSession(self)
         self.session.verify = verify
@@ -175,7 +165,6 @@ class PyiCloudService:
                 login_successful = True
             except PyiCloudAPIResponseException:
                 LOGGER.debug("Invalid authentication token, will log in from scratch.")
-
         if not login_successful and service is not None:
             app = self.data["apps"][service]
             if "canLaunchWithOneFactor" in app and app["canLaunchWithOneFactor"]:
@@ -353,6 +342,19 @@ class PyiCloudService:
         if overrides:
             headers.update(overrides)
         return headers
+
+    def _load_session_data(self) -> None:
+        self.session_data = {}
+        try:
+            with open(self.session_path, encoding="utf-8") as session_f:
+                self.session_data = json.load(session_f)
+        except:
+            LOGGER.info("Session file does not exist")
+        session_client_id: Optional[str] = self.session_data.get("client_id")
+        if session_client_id:
+            self.client_id = session_client_id
+        else:
+            self.session_data.update({"client_id": self.client_id})
 
     @property
     def cookiejar_path(self) -> str:

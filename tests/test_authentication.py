@@ -1,7 +1,7 @@
 import inspect
 import os
 from typing import NamedTuple
-from unittest import TestCase
+from unittest import TestCase, mock
 
 import pyicloud_ipd
 import pytest
@@ -11,13 +11,14 @@ from icloudpd.base import dummy_password_writter, lp_filename_concatinator, main
 from icloudpd.logger import setup_logger
 from icloudpd.mfa_provider import MFAProvider
 from icloudpd.status import StatusExchange
+from pyicloud_ipd.base import PyiCloudService
 from pyicloud_ipd.file_match import FileMatchPolicy
 from pyicloud_ipd.raw_policy import RawTreatmentPolicy
 from pyicloud_ipd.sms import parse_trusted_phone_numbers_payload
 from pyicloud_ipd.utils import constant, identity
 from vcr import VCR
 
-from tests.helpers import path_from_project_root, recreate_path
+from tests.helpers import mocked_load_session_data, path_from_project_root, recreate_path
 
 vcr = VCR(decode_compressed_response=True, record_mode="none")
 
@@ -130,26 +131,9 @@ class AuthenticationTestCase(TestCase):
         for dir in [base_dir, cookie_dir]:
             recreate_path(dir)
 
-        # We need to create a session file first before we test the auth token validation
-        with vcr.use_cassette(os.path.join(self.vcr_path, "2sa_flow_valid_code.yml")):
-            runner = CliRunner(env={"CLIENT_ID": "DE309E26-942E-11E8-92F5-14109FE0B321"})
-            result = runner.invoke(
-                main,
-                [
-                    "--username",
-                    "jdoe@gmail.com",
-                    "--password",
-                    "password1",
-                    "--no-progress-bar",
-                    "--cookie-directory",
-                    cookie_dir,
-                    "--auth-only",
-                ],
-                input="0\n654321\n",
-            )
-            assert result.exit_code == 0
-
-        with vcr.use_cassette(os.path.join(self.vcr_path, "successful_auth.yml")):
+        with vcr.use_cassette(
+            os.path.join(self.vcr_path, "successful_auth.yml")
+        ), mock.patch.object(PyiCloudService, "_load_session_data", new=mocked_load_session_data):
             runner = CliRunner(env={"CLIENT_ID": "DE309E26-942E-11E8-92F5-14109FE0B321"})
             result = runner.invoke(
                 main,
