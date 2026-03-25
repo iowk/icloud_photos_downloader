@@ -791,6 +791,22 @@ class PyiCloudService:
             return self.trust_session()
         return False
 
+    def send_2fa_code(self) -> bool:
+        """Sends a 2FA code to the trusted device."""
+        headers = self._get_auth_headers({"Accept": "application/json"})
+
+        try:
+            self.session.put(
+                f"{self.AUTH_ENDPOINT}/verify/trusteddevice/securitycode",
+                headers=headers,
+            )
+        except PyiCloudAPIResponseException:
+            LOGGER.error("Failed to send 2FA code.")
+            return False
+
+        LOGGER.debug("2FA code sent successfully.")
+        return True
+
     def validate_2fa_code(self, code: str) -> bool:
         """Verifies a verification code received via Apple's 2FA system (HSA2)."""
         data = {"securityCode": {"code": code}}

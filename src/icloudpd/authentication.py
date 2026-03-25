@@ -103,6 +103,7 @@ def authenticator(
 
     if icloud.requires_2fa:
         logger.info("Two-factor authentication is required (2fa)")
+        icloud.send_2fa_code()
         notificator()
         if mfa_provider == MFAProvider.WEBUI:
             request_2fa_web(icloud, logger, status_exchange)
